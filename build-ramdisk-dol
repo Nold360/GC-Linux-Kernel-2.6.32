@@ -2,7 +2,7 @@
  
 target=zImage.initrd
 ofile=GrImage
-KSRC=/home/nold/gclinux/linux-2.6.32
+KSRC=.
 [ -r ${KSRC}/arch/powerpc/boot/${target} ] || {
  echo "Can't find target image ${KSRC}/arch/powerpc/boot/${target}"
  exit 1
