@@ -1009,25 +1009,20 @@ static int sd_reset_sequence(struct sd_host *host)
 		sd_cmd_crc(cmd, SD_SEND_IF_COND, 0x01AA, 0x87); //CMD8 + Check and CRC
 		retval = sd_start_command(host, cmd); 
 		if(retval==0x01) { 	
-			for(k = 0; k < 8; k++) {
+			memset(&cmd_ret, 0, sizeof(cmd_ret));
+			spi_read(host, &cmd_ret, sizeof(cmd_ret));
+			sd_end_command(host); 	
+			if (cmd_ret == 0x01AA) { //Check if CMD8 is alright
+				sd_cmd(cmd, MMC_SPI_READ_OCR, 0);//CMD58
+				retval = sd_start_command(host, cmd);	
+
 				memset(&cmd_ret, 0, sizeof(cmd_ret));
 				spi_read(host, &cmd_ret, sizeof(cmd_ret));
-				sd_end_command(host);	
-				if (cmd_ret == 0x01AA) {
-					sd_cmd(cmd, MMC_SPI_READ_OCR, 0);//CMD58
-					retval = sd_start_command(host, cmd);	
+				sd_end_command(host);		
 
-					memset(&cmd_ret, 0, sizeof(cmd_ret));
-					spi_read(host, &cmd_ret, sizeof(cmd_ret));
-					sd_end_command(host);		
-
-					if(retval==0x01) {
-						break;
-					} 
-				}
-			}               
-			if(k > 0 && retval != 0x01) {
-				DBG("SDHC-Driver: ERROR! BAD CMD58 RETVAL: %x\n",retval); 
+				if(retval==0x01) { //Everything is alright
+					break;
+				} 
 			} 
 			break;
 		} 		
