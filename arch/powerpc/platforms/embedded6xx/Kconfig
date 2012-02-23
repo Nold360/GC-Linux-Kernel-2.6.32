@@ -1,0 +1,200 @@
+config EMBEDDED6xx
+	bool "Embedded 6xx/7xx/7xxx-based boards"
+	depends on 6xx && BROKEN_ON_SMP
+
+config LINKSTATION
+	bool "Linkstation / Kurobox(HG) from Buffalo"
+	depends on EMBEDDED6xx
+	select MPIC
+	select FSL_SOC
+	select PPC_UDBG_16550 if SERIAL_8250
+	select DEFAULT_UIMAGE
+	select MPC10X_OPENPIC
+	select MPC10X_BRIDGE
+	help
+	  Select LINKSTATION if configuring for one of PPC- (MPC8241)
+	  based NAS systems from Buffalo Technology. So far only
+	  KuroboxHG has been tested. In the future classical Kurobox,
+	  Linkstation-I HD-HLAN and HD-HGLAN versions, and PPC-based
+	  Terastation systems should be supported too.
+
+config STORCENTER
+	bool "IOMEGA StorCenter"
+	depends on EMBEDDED6xx
+	select MPIC
+	select FSL_SOC
+	select PPC_UDBG_16550 if SERIAL_8250
+	select MPC10X_OPENPIC
+	select MPC10X_BRIDGE
+	help
+	  Select STORCENTER if configuring for the iomega StorCenter
+	  with an 8241 CPU in it.
+
+config MPC7448HPC2
+	bool "Freescale MPC7448HPC2(Taiga)"
+	depends on EMBEDDED6xx
+	select TSI108_BRIDGE
+	select DEFAULT_UIMAGE
+	select PPC_UDBG_16550
+	select TSI108_BRIDGE
+	help
+	  Select MPC7448HPC2 if configuring for Freescale MPC7448HPC2 (Taiga)
+	  platform
+
+config PPC_HOLLY
+	bool "PPC750GX/CL with TSI10x bridge (Hickory/Holly)"
+	depends on EMBEDDED6xx
+	select TSI108_BRIDGE
+	select PPC_UDBG_16550
+	select TSI108_BRIDGE
+	help
+	  Select PPC_HOLLY if configuring for an IBM 750GX/CL Eval
+	  Board with TSI108/9 bridge (Hickory/Holly)
+
+config PPC_PRPMC2800
+	bool "Motorola-PrPMC2800"
+	depends on EMBEDDED6xx
+	select MV64X60
+	select NOT_COHERENT_CACHE
+	help
+	  This option enables support for the Motorola PrPMC2800 board
+
+config PPC_C2K
+	bool "SBS/GEFanuc C2K board"
+	depends on EMBEDDED6xx
+	select MV64X60
+	select NOT_COHERENT_CACHE
+	select MTD_CFI_I4
+	help
+	  This option enables support for the GE Fanuc C2K board (formerly
+	  an SBS board).
+
+config TSI108_BRIDGE
+	bool
+	select PCI
+	select MPIC
+	select MPIC_WEIRD
+
+config MPC10X_BRIDGE
+	bool
+	select PPC_INDIRECT_PCI
+
+config MV64X60
+	bool
+	select PPC_INDIRECT_PCI
+	select CHECK_CACHE_COHERENCY
+
+config MPC10X_OPENPIC
+	bool
+
+config MPC10X_STORE_GATHERING
+	bool "Enable MPC10x store gathering"
+	depends on MPC10X_BRIDGE
+
+config GAMECUBE
+	bool "Nintendo-GameCube"
+	depends on EMBEDDED6xx
+	select GAMECUBE_COMMON
+	help
+	  Select GAMECUBE if configuring for the Nintendo GameCube.
+	  More information at: <http://gc-linux.sourceforge.net/>
+
+config WII
+	bool "Nintendo-Wii"
+	depends on EMBEDDED6xx
+	select GAMECUBE_COMMON
+	select PPC_LIB_RHEAP if STARLET_IOS
+	select USB_ARCH_HAS_EHCI if STARLET_MINI
+	select USB_ARCH_HAS_OHCI if STARLET_MINI
+	select HAVE_GENERIC_DMA_COHERENT
+	help
+	  Select WII if configuring for the Nintendo Wii.
+	  More information at: <http://gc-linux.sourceforge.net/>
+
+config STARLET_IOS
+	bool "Nintendo Wii Starlet IOS support"
+	depends on WII
+	default y
+
+config STARLET_MINI
+	bool "Team Twiizers 'mini' firmware support"
+	depends on WII && EXPERIMENTAL
+	default y
+
+config FLIPPER_PIC
+	bool
+	depends on GAMECUBE_COMMON
+	default y
+
+config HLWD_PIC
+	bool
+	depends on STARLET_MINI
+	default y
+
+config GAMECUBE_COMMON
+	bool
+	select NOT_COHERENT_CACHE
+	select FLIPPER_PIC
+	default n
+
+config GAMECUBE_UDBG
+	bool "Nintendo GameCube/Wii udbg support"
+	depends on GAMECUBE_COMMON
+	default n
+	help
+	  If you say yes to this option, you will be able to choose between
+	  several udbg drivers available for the Nintendo GameCube/Wii.
+
+	  If in doubt, say N here.
+
+choice
+	prompt "Nintendo GameCube/Wii udbg drivers"
+	depends on GAMECUBE_UDBG
+
+config USBGECKO_UDBG
+	bool "USB Gecko udbg console for the Nintendo GameCube/Wii"
+	help
+	  If you say yes to this option, support will be included for the
+	  USB Gecko adapter as an udbg console.
+	  The USB Gecko is a EXI to USB Serial converter that can be plugged
+	  into a memcard slot in the Nintendo GameCube/Wii.
+
+	  This driver bypasses the EXI layer completely.
+
+	  If in doubt, say N here.
+
+config GAMECUBE_VIDEO_UDBG
+	bool "Nintendo GameCube/Wii framebuffer udbg console"
+	select FONTS
+	select FONT_8x16
+	help
+	  If you say yes to this option, support will be included for a
+	  framebuffer based udbg console for the Nintendo GameCube/Wii.
+
+	  If in doubt, say N here.
+
+endchoice
+
+config GAMECUBE_RSW
+	bool "Nintendo GameCube/Wii reset switch/button"
+	depends on GAMECUBE_COMMON
+	default y
+	help
+	  If you say yes to this option, support will be included for the
+	  reset switch/button of the Nintendo GameCube/Wii.
+
+	  If in doubt, say Y here.
+
+config HLWD_GPIO
+	bool "Nintendo Wii (Hollywood) GPIO support"
+	depends on GPIOLIB && WII
+	default y
+	help
+	  If you say yes to this option, support will be included for the
+	  GPIOs provided by the Hollywood chipset of the Nintendo Wii
+	  video game console.
+	  Those GPIO lines control, for example, the sensor bar IR leds,
+	  the front led, or the eject switch of the disk unit.
+
+	  If in doubt, say Y here.
+

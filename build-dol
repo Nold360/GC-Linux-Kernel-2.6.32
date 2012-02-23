@@ -1,0 +1,30 @@
+#!/bin/bash
+ 
+target=zImage
+ofile=gcImage
+KSRC=/home/nold/linux-2.6.32
+[ -r ${KSRC}/arch/powerpc/boot/${target} ] || {
+ echo "Can't find target image ${KSRC}/arch/powerpc/boot/${target}"
+ exit 1
+}
+ 
+cp ${KSRC}/arch/powerpc/boot/${target} ${ofile}
+ 
+CROSS=powerpc-linux-
+ 
+echo "+ building DOL"
+load=$(${CROSS}readelf -l "$ofile" | \
+	perl -lane'printf"%08x\n",hex($F[3])+0x80000000 if /LOAD/;')
+echo "  LOAD: $load"
+entry=$(${CROSS}readelf -l "$ofile" | \
+	perl -lane'printf"%08x\n",hex($F[2])+0x80000000 if /Entry point/;')
+echo "  EP  : $entry"
+ 
+${CROSS}objcopy -O binary \
+	-R .comment -R .shstrtab -R .symtab -R .strtab \
+	-R .gnu.attributes \
+	${ofile} ${ofile}.bin
+doltool -c ${ofile}.bin $load $entry
+doltool -i ${ofile}.dol
+echo ""
+
